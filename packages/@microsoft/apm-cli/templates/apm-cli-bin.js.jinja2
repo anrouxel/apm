@@ -3,48 +3,48 @@ const { platform, arch, env, version, release } = process;
 
 const PLATFORMS = {
 {%- for npm_platform, archs in grouped_platforms.items() %}
-        {{ npm_platform }}: {
+    "{{ npm_platform }}": {
 {%- for npm_arch in archs %}
-                {{ npm_arch }}: "@microsoft/apm-cli-{{ npm_platform }}-{{ npm_arch }}/apm{%- if npm_platform == 'win32' -%}.exe{%- endif -%}",
+        "{{ npm_arch }}": "@microsoft/apm-cli-{{ npm_platform }}-{{ npm_arch }}/apm{% if npm_platform == 'win32' %}.exe{% endif %}",
 {%- endfor %}
-        },
+    },
 {%- endfor %}
 };
 
 const binPath = env.APM_BINARY ||
-        PLATFORMS?.[platform]?.[arch];
+    PLATFORMS?.[platform]?.[arch];
 
 if (binPath) {
-        const packageManager = detectPackageManager();
-        const result = require("child_process").spawnSync(
-                require.resolve(binPath),
-                process.argv.slice(2),
-                {
-                        shell: false,
-                        stdio: "inherit",
-                        env: {
-                                ...env,
-                                JS_RUNTIME_VERSION: version,
-                                JS_RUNTIME_NAME: release.name,
-                                ...(packageManager != null
-                                        ? { NODE_PACKAGE_MANAGER: packageManager }
-                                        : {}),
-                        },
-                },
-        );
+    const packageManager = detectPackageManager();
+    const result = require("child_process").spawnSync(
+        require.resolve(binPath),
+        process.argv.slice(2),
+        {
+            shell: false,
+            stdio: "inherit",
+            env: {
+                ...env,
+                JS_RUNTIME_VERSION: version,
+                JS_RUNTIME_NAME: release.name,
+                ...(packageManager != null
+                    ? { NODE_PACKAGE_MANAGER: packageManager }
+                    : {}),
+            },
+        },
+    );
 
-        if (result.error) {
-                throw result.error;
-        }
+    if (result.error) {
+        throw result.error;
+    }
 
-        process.exitCode = result.status;
+    process.exitCode = result.status;
 } else {
-        console.error(
-                "The APM CLI package doesn't ship with prebuilt binaries for your platform yet. " +
-                        "You can still use the CLI by cloning the microsoft/apm repo from GitHub, " +
-                        "and follow the instructions there to build the CLI for your platform.",
-        );
-        process.exitCode = 1;
+    console.error(
+        "The APM CLI package doesn't ship with prebuilt binaries for your platform yet. " +
+        "You can still use the CLI by cloning the microsoft/apm repo from GitHub, " +
+        "and follow the instructions there to build the CLI for your platform.",
+    );
+    process.exitCode = 1;
 }
 
 /**
@@ -57,11 +57,11 @@ if (binPath) {
  * @returns The package manager string (`npm/8.3.0`) or null if the user agent string isn't set.
  */
 function detectPackageManager() {
-        const userAgent = env.npm_config_user_agent;
+    const userAgent = env.npm_config_user_agent;
 
-        if (userAgent == null) {
-                return null;
-        }
+    if (userAgent == null) {
+        return null;
+    }
 
-        return userAgent.split(" ")[0];
+    return userAgent.split(" ")[0];
 }
