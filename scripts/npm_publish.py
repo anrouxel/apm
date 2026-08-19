@@ -71,12 +71,14 @@ def get_repo_root() -> Path:
 
 
 def get_version(repo_root: Path) -> str:
-    """Get the version from the manifest file."""
-    import toml
+    try:
+        import tomllib
+    except ImportError:
+        import tomli as tomllib
     
     manifest_path = repo_root / MANIFEST_FILE
-    with open(manifest_path, "r", encoding="utf-8") as f:
-        data = toml.load(f)
+    with open(manifest_path, "rb") as f:
+        data = tomllib.load(f)
         
     return data["project"]["version"]
 
